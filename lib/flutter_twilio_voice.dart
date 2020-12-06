@@ -139,7 +139,7 @@ class FlutterTwilioVoice {
       return CallState.log;
     } else if (state.startsWith("LOG|")) {
       List<String> tokens = state.split('|');
-      print(tokens[1]);
+      print('${tokens[1]} ${tokens[2]}');
       return CallState.log;
     } else if (state.startsWith("Connected|")) {
       List<String> tokens = state.split('|');
