@@ -102,6 +102,13 @@ class FlutterTwilioVoice {
     return _channel.invokeMethod('defaultCaller', <String, dynamic>{"defaultCaller": callerName});
   }
 
+  /// Twilio can pass custom parameters (key-value pairs) with the CallInvite.
+  /// Here we can pass a Caller Id (a friendly name) from the TWIML application server.
+  /// Use this to set the key name, used to lookup the caller id in the custom parameters dictionary.
+  static Future<bool> setCallerIdCustomParameterKey(String key) {
+    return _channel.invokeMethod('callerIdCustomParameterKey', <String, dynamic>{"key": key});
+  }
+
   static Future<bool> hasMicAccess() {
     return _channel.invokeMethod('hasMicPermission', {});
   }
