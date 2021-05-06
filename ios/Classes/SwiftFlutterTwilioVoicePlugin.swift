@@ -17,6 +17,7 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
     
     var accessToken:String?
     var identity = "alice"
+    var callerIdCustomParameterKey: String = "CALLER_ID";    
     var callTo: String = "error"
     var defaultCaller = "Unknown Caller"
     var deviceToken: Data? {
@@ -223,6 +224,9 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
                 clients["defaultCaller"] = defaultCaller
                 UserDefaults.standard.set(clients, forKey: kClientList)
             }
+        }else if flutterCall.method == "callerIdCustomParameterKey"{
+            guard let value = arguments["key"] as? String else {return}
+            callerIdCustomParameterKey = value
         }else if flutterCall.method == "hasMicPermission" {
             result(true) ///do nuthin
             return
@@ -416,7 +420,7 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
         from = from.replacingOccurrences(of: "client:", with: "")
         
         self.sendPhoneCallEvents(description: "Ringing|\(from)|\(callInvite.to)|Incoming", isError: false)
-        reportIncomingCall(from: from, uuid: callInvite.uuid)
+        reportIncomingCall(from: from, uuid: callInvite.uuid, callerId: callInvite.customParameters?[self.callerIdCustomParameterKey])
         self.callInvite = callInvite
     }
     
@@ -653,12 +657,12 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
         }
     }
     
-    func reportIncomingCall(from: String, uuid: UUID) {
+    func reportIncomingCall(from: String, uuid: UUID, callerId: String?) {
         let callHandle = CXHandle(type: .generic, value: from)
         
         let callUpdate = CXCallUpdate()
         callUpdate.remoteHandle = callHandle
-        callUpdate.localizedCallerName = clients[from] ?? self.clients["defaultCaller"] ?? defaultCaller
+        callUpdate.localizedCallerName = callerId ?? clients[from] ?? self.clients["defaultCaller"] ?? defaultCaller
         callUpdate.supportsDTMF = true
         callUpdate.supportsHolding = true
         callUpdate.supportsGrouping = false
@@ -667,9 +671,9 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
         
         callKitProvider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
-                self.sendPhoneCallEvents(description: "LOG|Failed to report incoming call successfully: \(error.localizedDescription).", isError: false)
+                self.sendPhoneCallEvents(description: "LOG|ERROR|Failed to report incoming call successfully: \(error.localizedDescription).", isError: false)
             } else {
-                self.sendPhoneCallEvents(description: "LOG|Incoming call successfully reported.", isError: false)
+                self.sendPhoneCallEvents(description: "LOG|INFO|Incoming call successfully reported.", isError: false)
             }
         }
     }
