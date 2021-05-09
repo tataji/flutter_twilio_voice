@@ -197,6 +197,10 @@ class FlutterTwilioVoice {
     return callDirection;
   }
 
+  static CallDirection getCallDirection() {
+    return callDirection;
+  }
+
   static List<String> splitAtFirstPipe(String sz)
     => sz.split(RegExp(r"(?<!.*\|.*)\|")).toList();
 
