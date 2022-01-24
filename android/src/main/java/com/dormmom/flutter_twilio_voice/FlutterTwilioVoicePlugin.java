@@ -10,6 +10,7 @@ import com.twilio.voice.UnregistrationListener;
 import com.twilio.voice.Voice;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import android.Manifest;
 import android.app.Activity;
@@ -324,7 +325,12 @@ public class FlutterTwilioVoicePlugin implements FlutterPlugin, MethodChannel.Me
             result.success(true);
         } else if (call.method.equals("makeCall")) {
             Log.d(TAG, "Making new call");
-            final HashMap<String, String> params = new HashMap<>();
+            final Map<String, Object> allParams = call.arguments();
+            final Map<String, String> params = new HashMap<>(allParams.size());
+            for (Map.Entry<String, Object> entry : allParams.entrySet()) {
+                final Object value = entry.getValue();
+                params.put(entry.getKey(), value == null ? "" : value.toString());
+            }
             params.put("To", call.argument("to").toString());
             params.put("From", call.argument("from").toString());
             this.callOutgoing = true;
