@@ -11,6 +11,7 @@ import com.twilio.voice.Voice;
 import com.dormmom.flutter_twilio_voice.AnswerJavaActivity;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import android.Manifest;
 import android.app.Activity;
@@ -366,7 +367,12 @@ public class FlutterTwilioVoicePlugin implements FlutterPlugin, MethodChannel.Me
         } else if (call.method.equals("makeCall")) {
             Log.d(TAG, "Making new call");
             sendPhoneCallEvents("LOG|INFO|Making new call");
-            final HashMap<String, String> params = new HashMap<>();
+            final Map<String, Object> allParams = call.arguments();
+            final Map<String, String> params = new HashMap<>(allParams.size());
+            for (Map.Entry<String, Object> entry : allParams.entrySet()) {
+                final Object value = entry.getValue();
+                params.put(entry.getKey(), value == null ? "" : value.toString());
+            }
             Log.d(TAG, "calling");
             Log.d(TAG, call.argument("to").toString());
             params.put("To", call.argument("to").toString());
