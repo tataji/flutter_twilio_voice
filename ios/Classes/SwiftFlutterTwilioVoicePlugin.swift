@@ -126,8 +126,8 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
                 }
             }*/
         } else if flutterCall.method == "makeCall" {
-            guard let callTo = arguments["to"] as? String else {return}
-            guard let callFrom = arguments["from"] as? String else {return}
+            guard let callTo = arguments["To"] as? String else {return}
+            guard let callFrom = arguments["From"] as? String else {return}
             self.callArgs = arguments
             self.callOutgoing = true
             if let accessToken = arguments["accessToken"] as? String{

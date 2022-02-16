@@ -374,8 +374,8 @@ public class FlutterTwilioVoicePlugin implements FlutterPlugin, MethodChannel.Me
                 params.put(entry.getKey(), value == null ? "" : value.toString());
             }
             Log.d(TAG, "calling");
-            Log.d(TAG, call.argument("to").toString());
-            params.put("To", call.argument("to").toString());
+            Log.d(TAG, params.get("To"));
+            params.put("To", params.get("To"));
 //             params.put("From", call.argument("from").toString());
             this.callOutgoing = true;
             final ConnectOptions connectOptions = new ConnectOptions.Builder(this.accessToken)

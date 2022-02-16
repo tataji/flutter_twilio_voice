@@ -122,8 +122,8 @@ class FlutterTwilioVoice {
     assert(to != null);
     assert(from != null);
     var options = extraOptions != null ? extraOptions : Map<String, dynamic>();
-    options['from'] = from;
-    options['to'] = to;
+    options['From'] = from;
+    options['To'] = to;
     callFrom = from;
     callTo = to;
     callDirection = CallDirection.outgoing;
