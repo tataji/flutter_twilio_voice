@@ -703,7 +703,7 @@ public class SwiftFlutterTwilioVoicePlugin: NSObject, FlutterPlugin,  FlutterStr
         let connectOptions: ConnectOptions = ConnectOptions(accessToken: token) { (builder) in
             builder.params = ["To": self.callTo]
             for (key, value) in self.callArgs {
-                if (key != "to" && key != "from") {
+                if (key != "To" && key != "From") {
                     builder.params[key] = "\(value)"
                 }
             }
