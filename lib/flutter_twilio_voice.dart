@@ -294,6 +294,11 @@ class FlutterTwilioVoice {
         case 'Ringing':
           callFrom = _prettyPrintNumber(payload[0]);
           callTo = _prettyPrintNumber(payload[1]);
+          if (payload.length > 2) {
+            callDirection = 'Incoming' == payload[2]
+                ? CallDirection.incoming
+                : CallDirection.outgoing;
+          }
 
           print(
               'Ringing - From: $callFrom, To: $callTo, Direction: $callDirection');
