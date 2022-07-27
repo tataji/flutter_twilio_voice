@@ -60,7 +60,7 @@ public class IncomingCallNotificationService extends Service {
         return null;
     }
 
-    private Notification createNotification(CallInvite callInvite, int notificationId, int channelImportance) {
+    private Notification createNotification(CallInvite callInvite, int notificationId, int channelImportance,boolean isCallAccepted) {
         Log.i(TAG, "createNotification");
         Intent intent = new Intent(this, AnswerJavaActivity.class);
         intent.setAction(Constants.ACTION_INCOMING_CALL_NOTIFICATION);
@@ -80,20 +80,25 @@ public class IncomingCallNotificationService extends Service {
         Log.i(TAG, "Setting notification from, "+ callInvite.getFrom());
         String fromId = callInvite.getFrom().replace("client:","");
         String caller = preferences.getString(fromId, preferences.getString("defaultCaller", "Unknown caller"));
-
+        String callerName;
+        if(isCallAccepted){
+            callerName = "CallAccepted";
+        }else{
+            callerName = getString(R.string.new_call,caller);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return buildNotification(getApplicationName(context),getString(R.string.new_call,caller),
+            return buildNotification(getApplicationName(context),callerName,
                     pendingIntent,
                     extras,
                     callInvite,
                     notificationId,
-                    createChannel(channelImportance));
+                    createChannel(channelImportance),isCallAccepted);
         } else {
 
             return new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.ic_call_end_white_24dp)
                     .setContentTitle(getApplicationName(context))
-                    .setContentText(getString(R.string.new_call,caller))
+                    .setContentText(callerName)
                     .setAutoCancel(true)
                     .setOngoing(true)
                     .setExtras(extras)
@@ -124,7 +129,7 @@ public class IncomingCallNotificationService extends Service {
     private Notification buildNotification(String title, String text, PendingIntent pendingIntent, Bundle extras,
                                            final CallInvite callInvite,
                                            int notificationId,
-                                           String channelId) {
+                                           String channelId,boolean isCallAccepted) {
         Log.d(TAG, "Building notification");
         Intent rejectIntent = new Intent(getApplicationContext(), IncomingCallNotificationService.class);
         rejectIntent.setAction(Constants.ACTION_REJECT);
@@ -151,8 +156,12 @@ public class IncomingCallNotificationService extends Service {
                         .setAutoCancel(true)
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .addAction(android.R.drawable.ic_menu_delete, getString(R.string.decline), piRejectIntent)
-                        .addAction(android.R.drawable.ic_menu_call, getString(R.string.answer), piAcceptIntent)
                         .setFullScreenIntent(pendingIntent, true);
+        if(!isCallAccepted){
+            builder.setWhen(System.currentTimeMillis());
+            builder.setShowWhen(true);
+            builder.addAction(android.R.drawable.ic_menu_call, getString(R.string.answer), piAcceptIntent);
+        }
 
         return builder.build();
     }
@@ -179,8 +188,9 @@ public class IncomingCallNotificationService extends Service {
     }
 
     private void accept(CallInvite callInvite, int notificationId) {
-        endForeground();
+        //endForeground();
         Log.i(TAG, "accept call invite!");
+        setCallInProgressNotification(callInvite, notificationId,true);
         Intent activeCallIntent = new Intent();
         activeCallIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         activeCallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -209,7 +219,7 @@ public class IncomingCallNotificationService extends Service {
     private void handleIncomingCall(CallInvite callInvite, int notificationId) {
         Log.i(TAG, "handle incomming call");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            setCallInProgressNotification(callInvite, notificationId);
+            setCallInProgressNotification(callInvite, notificationId, false);
         }
         sendCallInviteToActivity(callInvite, notificationId);
     }
@@ -219,13 +229,13 @@ public class IncomingCallNotificationService extends Service {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    private void setCallInProgressNotification(CallInvite callInvite, int notificationId) {
+    private void setCallInProgressNotification(CallInvite callInvite, int notificationId,boolean isCallAccepted) {
         if (isAppVisible()) {
             Log.i(TAG, "setCallInProgressNotification - app is visible.");
-            startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_LOW));
+            startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_LOW,isCallAccepted));
         } else {
             Log.i(TAG, "setCallInProgressNotification - app is NOT visible.");
-            startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_HIGH));
+            startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_HIGH,isCallAccepted));
         }
     }
 
