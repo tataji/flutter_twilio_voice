@@ -82,7 +82,7 @@ public class IncomingCallNotificationService extends Service {
         String caller = preferences.getString(fromId, preferences.getString("defaultCaller", "Unknown caller"));
         String callerName;
         if(isCallAccepted){
-            callerName = "CallAccepted";
+            callerName = getString(R.string.call_accepted);
         }else{
             callerName = getString(R.string.new_call,caller);
         }
